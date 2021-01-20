@@ -1,0 +1,5 @@
+%Copyright 2013 The MathWorks, Inc.
+
+
+Datasets z1-z11 were acquired with the input signals in the SignalBuilder in Host_serial model.
+Dataset z12 was created by selectinga range of z3 (where deadzone-behaviour was not observed)
