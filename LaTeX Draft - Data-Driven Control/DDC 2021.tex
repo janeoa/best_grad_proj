@@ -1,0 +1,89 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\begin{document}
+
+\title{Data-Driven Control for DC Motor
+}
+
+\author{\IEEEauthorblockN{Oraz Ospanov}
+\IEEEauthorblockA{
+oraz.ospanov@nu.edu.kz}
+\and
+\IEEEauthorblockN{Asset Malik}
+\IEEEauthorblockA{
+asset.malik@nu.edu.kz}
+\and
+\IEEEauthorblockN{Andrey Yershov}
+\IEEEauthorblockA{
+andrey.yershov@nu.edu.kz}
+}
+
+\maketitle
+
+\begin{abstract}
+Data-Driven control techniques have become increasingly popular in recent years due to the wide availability of data and progress in data science.
+Data-Driven control design methods bypass the system identification
+step and directly exploit collected data to construct the controller.
+In this paper, we investigate the application of data-driven
+methods to the control of DC motor drives.
+\end{abstract}
+
+\begin{IEEEkeywords}
+data-driven control, DC motor
+\end{IEEEkeywords}
+
+\section{Literature overview}
+
+The article \cite{silva2019a} utilizes Data-Driven Control to train the control gains for better system controllability.
+
+The article \cite{naung2018a} presents Data-Driven Control used for system parameters estimation, an approach that we are planning to use.
+
+\cite{carlet2020data} is an important article for our project, as it explores predictive current control for
+synchronous motor drives - a topic closely related to ours. 
+
+\cite{hanke2019continuous} introduces Permanent Magnet Synchronous Motor ripple avoidance using DDC.
+
+\cite{coulson2019data} introduces novel data-enabled predictive
+control (DeePC) algorithm is presented that computes optimal
+and safe control policies using real-time feedback driving the
+unknown system along a desired trajectory while satisfying
+system constraints.
+
+\cite{hou2013model} is a canonical survey paper in the field. The authors explore the recent advances in DDC and discuss the perspectives of future related work.
+
+Article \cite{de2019a} discusses the important attributes for systems with data-driven control: Stabilization, Optimality, and Robustness.
+
+Article \cite{rosolia2018a} explores the ability of the data-driven system to adapt and thus improve its performance in case of changes of parameters.
+
+Article \cite{bu2018a} analyzes the behavior of data-driven control in the extreme case of output saturation. 
+
+Article \cite{pravallika2021a} is an official MATLAB tutorial to DDC, which we follow with our designed controller simulation in the beginning of our project.
+
+A recent article \cite{Berberich_2020} overviews a problem of state-feedback controllers for discrete-time linear time-invariant systems, based directly on measured data. 
+
+A PhD thesis \cite{kergus} explores a Data-driven model reference control in the frequency-domain. 
+
+An article \cite{CAMPESTRINI20172628} deals with Data-Driven (DD) control design in a Model Reference (MR) framework. 
+
+Article \cite{vuillemin2019hybrid} shows a discrete-time control-law from frequency-data of a continuous-time plant so that their hybrid interconnection matches a given continuous-time reference model up to the Nyquist
+frequency. 
+
+\section{Introduction}
+
+\section{Methods}
+
+\section{Results}
+
+\bibliographystyle{plain}
+\bibliography{bibliography.bib}
+
+\end{document}
