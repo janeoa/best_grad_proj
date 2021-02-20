@@ -38,16 +38,20 @@ In your Acknowledgments section, give credit to all the people who helped you in
 %%% Introduction
 
 \chapter{Introduction}
-Data-Driven control techniques have become increasingly popular in recent years due to the wide availability of data and progress in data science.
-Data-Driven control design methods bypass the system identification
-step and directly exploit collected data to construct the controller.
-In this paper, we investigate the application of data-driven
-methods to the control of DC motor drives.
+The modern control theory, also known as Model Based Control has been used both for linear and non-linear systems extensively since 1960. The Model Based Control is, as could be guessed from it's name, relies solely on the model of the plant for further controller design. However, there is usually no chance of creating an exact plant model for the system, as well as no efficient way of creation high accuracy plant model using the classical model based control \cite{hou2013model}. Moreover, the possible plant model errors have to be considered when designing the controller from the plant model, what requires additional resources and time to provide robustness of the controller. All of the used control design methods heavily rely on the assumptions of an accurate plant model design. This means that in case if unmodeled dynamics occurs, the controller is believed to be unable to provide further handling of the dynamics. As could be seen in Fig. \ref{fig:mbcsctruct}, the Model Based Controller design starts from the assumptions about the model plant and is directed at regulation of the plant \cite{hou2013model}.
+
+\begin{figure} [h!]
+\centerline{\includegraphics[width=.75\textwidth]{Screenshots for paper/1.png}}
+\caption{Common structure of the Model Based Control \cite{hou2013model}}
+\label{fig:mbcsctruct}
+\end{figure}
+
+The recent development of highly capable machine learning techniques and frameworks.
+
+Data-Driven control for various purposes is becoming the superior method in systems where the model is not available or is changing over the course of life cycle, i.e. adaptability is necessary. Data-Driven controller design method allows to bypass the tedious system identification step. However, as every machine learning problem, it requires big amounts of data. The data gathered from the system behaviour is used to identify the controller. In this paper, we investigate the application of data-driven control to the control of DC motor drives and experiment with data-driven controller estimation using reinforcement learning.
 
 \chapter{\label{chapter2} Related Work}
 
-
-\subsection{Andrey}
 
 The article written by Naung et al. \cite{naung2018a} is closely related to our work by the research aims and methods. Authors present Data-Driven Control used for system parameters identification, an approach that we are planning to use. The main goal of the paper is to perform system identification utilizing the data driven system control of the DC motor, with ultimate generation of the transfer function suitable for robust control of the plant. For this purpose, authors use MATLAB to create the Simulink model of the DC motor (Figure \ref{fig:dcsimulink}) and calculate the proportional-integral-differential (PID) controller according to the obtained models.
 
@@ -93,20 +97,78 @@ Hou and Wang created a canonical survey paper in the field in 2013 \cite{hou2013
 
 
 
-\subsection{Asset}
+Next article by Hanke, Wallscheid and Bocker \cite{hanke2019continuous}  introduces Permanent Magnet Synchronous Motor ripple avoidance using DDC. It also compares three types of linear controllers and the input/output data.
 
-Next article by Hanke, Wallscheid and Bocker \cite{hanke2019continuous}  introduces Permanent Magnet Synchronous Motor ripple avoidance using DDC.
+\begin{figure} [h!]
+\centerline{\includegraphics[width=.75\textwidth]{Screenshots for related work/Asset p1/Asset p1p1.png}}
+\caption{CCS-MPC at 60A
+\cite{hanke2019continuous}}
+\label{fig:p1p1}
+\end{figure}
 
-Article \cite{de2019a} discusses the important attributes for systems with data-driven control: Stabilization, Optimality, and Robustness.
+\begin{figure} [h!]
+\centerline{\includegraphics[width=.75\textwidth]{Screenshots for related work/Asset p1/Asset p1p2.png}}
+\caption{FOC at 60A
+\cite{hanke2019continuous}}
+\label{fig:p1p2}
+\end{figure}
 
-Article \cite{rosolia2018a} explores the ability of the data-driven system to adapt and thus improve its performance in case of changes of parameters.
+\begin{figure} [h!]
+\centerline{\includegraphics[width=.75\textwidth]{Screenshots for related work/Asset p1/Asset p1p3.png}}
+\caption{CCS-MPC at 60A
+\cite{hanke2019continuous}}
+\label{fig:p1p3}
+\end{figure}
 
-Article \cite{bu2018a} analyzes the behavior of data-driven control in the extreme case of output saturation. 
+\begin{figure} [h!]
+\centerline{\includegraphics[width=.75\textwidth]{Screenshots for related work/Asset p1/Asset p1p4.png}}
+\caption{FOC at 60A
+\cite{hanke2019continuous}}
+\label{fig:p1p4}
+\end{figure}
+
+We can clearly see that total harmonic distortion of the FOC system is smaller and that CCS-MPC only better at those special harmonics of the three phase system. 
+
+Article \cite{de2019a} discusses the important attributes for systems with data-driven control: Stabilization, Optimality, and Robustness. Authors argue that it is possible to create a linear approximation of a non linear closed loop system using only data-dependant linear matrix equations. 
+
+Article \cite{rosolia2018a} explores the ability of the data-driven system to adapt and thus improve its performance in case of changes of parameters. The author argues that it is possible to have a learning model that could be started without correct initial state and even learn from data without diverging back from better state, which is backed by simulation. Each discreet step of the controller is used as an iteration for the learning algorithm. Model Predictive Control (MPC) was chosen as a back-bone for the closed loop control and re-applied as MPC for Batch processes (iterations) and then replaced by LQR as LMCPC. 
+
+\begin{figure} [h!]
+\centerline{\includegraphics[width=.75\textwidth]{Screenshots for related work/Asset p1/Asset p2p1.png}}
+\caption{SS positions over ZY plane
+\cite{rosolia2018a}}
+\label{fig:p2p1}
+\end{figure}
+
+
+Article \cite{bu2018a} analyzes the behavior of data-driven control in the extreme case of output saturation. This paper also uses a linear system approximation approach with dynamic linearization, but also applies assumption that the system has an output saturation. This does increase the tracking performance but decreases the resting time of the closed loop system. 
 
 Article \cite{pravallika2021a} is an official MATLAB tutorial to DDC, which we follow with our designed controller simulation in the beginning of our project.
 
-\subsection{Oraz}
-A recent article \cite{Berberich_2020} overviews a problem of state-feedback controllers for discrete-time linear time-invariant systems, based directly on measured data. 
+A recent article \cite{Berberich_2020} overviews a problem of state-feedback controllers for discrete-time linear time-invariant systems, based directly on measured data. This paper presents the robust methods for data-driven control in which the stable closed-loop performance is guaranteed even in presence of noise in data. The design of state-feedback controllers is based on the parametrization technique analyzed in \cite{de2019a}, particularly the application of robust control techniques to the parametrization, which results in stable performance of the closed loop control with noisy inputs.
+
+In the paper \cite{piga2017direct} a data-driven approach is used to design a hierarchical controller which includes the inner and outer controllers to enhance the overall performance of the inner controller. The evaluation of the effectiveness of this type of method is done by means of simulation and practical experiments. Basically this paper proposes the implementation of the outer Model Predictive controller used for improving the performance of an inner closed loop controller. In such a way it is not only improves the overall performance of the system, but also takes care of constraints imposed on inputs and outputs. Figure \ref{fig:hierarchicalcontroller} shows the resultant hierarchical controller, in which it can be seen that the outer Model Predictive controller tracks the input and output variables and operates on the reference signal applied to the inner loop in order to satisfy the constraints imposed on inputs and outputs of an overall system as well as improve on the system performance. To test the results the simulation of a servo positioning system in dc motor was used. The inner loop controller design resulted in the following performance shown in figure \ref{fig:innerloopcontroller}. However because of the lower degrees of freedom of the controller the controller could not obtain the faster dynamics and thus resulted in slow dynamics with the rise time of about 4 s. Adding the model predictive controller resulted in much better performance as shown in figure \ref{fig:controllerwithMPC} below. The rise time resulted in 1.3 s, which is about 3 times as much faster as the previous result. 
+
+\begin{figure} [h!]
+\centerline{\includegraphics[width=.75\textwidth]{Screenshots for related work/constraint_data_driven_control_screenshot1.png}}
+\caption{Proposed hierarchical control architecture
+\cite{piga2017direct}}
+\label{fig:hierarchicalcontroller}
+\end{figure}
+
+\begin{figure} [h!]
+\centerline{\includegraphics[width=.75\textwidth]{Screenshots for related work/constraint_data_driven_control_screenshot2_innerloop.png}}
+\caption{Inner loop behaviour
+\cite{piga2017direct}}
+\label{fig:innerloopcontroller}
+\end{figure}
+
+\begin{figure} [h!]
+\centerline{\includegraphics[width=.75\textwidth]{Screenshots for related work/constraint_data_driven_control_screenshot2_usingMPC.png}}
+\caption{Closed loop behaviour with added MPC
+\cite{piga2017direct}}
+\label{fig:controllerwithMPC}
+\end{figure}
 
 A PhD thesis \cite{kergus} explores a Data-driven model reference control in the frequency-domain. 
 
