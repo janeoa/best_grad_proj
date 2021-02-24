@@ -8,9 +8,17 @@ void setup() {
   Serial.begin(115200);
   pinMode(c1, INPUT);
   pinMode(c2, INPUT);
+
+  Serial.println("c1\tc2");
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-
+  bool b1 = digitalRead(c1);
+  bool b2 = digitalRead(c2);
+  
+  Serial.print(b1);
+  Serial.print("\t");
+  Serial.println(b2);
+  
 }
