@@ -24,7 +24,7 @@
 \begin{abstract}
 
 \textbf{\textsl{
-This paper describes the work done for the Final Year Project on topic of Data Driven Control for DC motors. Multiple experimental approaches were considered for the project, for instance MATLAB/SIMULINK simulation of the DC motor with different configurations, a setup with an Arduino and DC motor driver and a dSpace DC motor setup. Data on voltage and position relation was collected for all of the mentioned approaches and was analyzed in MATLAB for the Data Driven controller design. The results are to be added later. Ultimate goal of this project is to create a plug-and-play reinforcement learning setup that generates controller for any given DC motor.
+This paper describes the work done for the Final Year Project on topic of Data Driven Control for DC motors. Multiple experimental approaches were considered for the project, for instance MATLAB/SIMULINK simulation of the DC motor with different configurations, a setup with an Arduino and DC motor driver, an STM32 micro controller and DC motor driver  and a dSpace DC motor setup. Data on voltage and position relation was collected for all of the mentioned approaches and was analyzed in MATLAB for the Data Driven controller design. The obtained results from comparison of the system identification toolbox generated transfer function with the validation time-position graph was 41.07\% for the STM32 joined with Arduino setup. While better results on transfer-function validation were achieved for the dSpace setup, it was not possible to verify the controller performance for it due to multiple reasons described in the implementation chapter. For the STM32 micro controller setup the robust controller was generated and proved to be fully functional.
 
 }}
 
@@ -242,6 +242,18 @@ The model identification step could either be very detailed, long and thus compu
 
 The controller is designed using PID tuner toolbox in a simple setup shown in Fig. \ref{fig:PIDdes}. The Simulink model obtained in previous step is linearized in this step and the controller gains are adjusted accordingly. This step provides an ability to adjust the needed controller characteristics, for example prioritize overshoot removal or decrease the response time. The balance is important in those settings as it provides optimal behaviour accuracy. The designed controller is then tested.
 
+
+\begin{figure} [h!]
+\centerline{\includegraphics[width=.85\textwidth]{Screenshots for paper/arduino/Final_hardware_testing/pid_tuner.PNG}}
+\caption{PID controller designer}
+\label{fig:PIDtunerMATLAB}
+\end{figure}
+
+The main advantage is obvious. The MATLAB has a lot of useful tools to tune and check the dynamic systems and filters applied to them to see the bound conditions and instabilities before implementation. However, that does introduce some unknown variables and concepts that were did not anticipate to use. The best example of such complications is Compensator formula from the PID controller simulink block parameters, which has a Filter Coefficient that is not typically present in the PID micro-controller devices.
+
+
+
+
 \section{Testing}
 
 Testing is done by supplying a voltage signal to the above mentioned model (Fig. \ref{fig:PIDdes} with designed controller and tracking the output (DC motor position). 
@@ -261,7 +273,7 @@ Further tests include the modification characteristics of DC motor model to matc
 \section{Arduino}
 
 \begin{figure} [h!]
-\centerline{\includegraphics[width=.75\textwidth]{Screenshots for paper/arduino/encoder signal.jpeg}}
+\centerline{\includegraphics[width=.95\textwidth]{Screenshots for paper/arduino/encoder signal.jpeg}}
 \caption{Arduino plot for encoder signal}
 \label{fig:arduinoEncoder}
 \end{figure}
@@ -269,7 +281,7 @@ Further tests include the modification characteristics of DC motor model to matc
 Arduino IDE is a software environment that creates near native machine code with included Arduino.h header. Figure \ref{fig:arduinoEncoder} shows the incoder signal plotted using Arduino.h's digital read and Serial plot libraries. The signal is produced by rotating rotor with encoder by hand. This might be important because even thought signal looks great, it is plotted on low angular velocity.
 
 \begin{figure} [h!]
-\centerline{\includegraphics[width=.75\textwidth]{Screenshots for paper/arduino/Model encoder arduin MATLAB.PNG}}
+\centerline{\includegraphics[width=.95\textwidth]{Screenshots for paper/arduino/Model encoder arduin MATLAB.PNG}}
 \caption{MATLAB Simulink Arduino model}
 \label{fig:arduinoSimulink}
 \end{figure}
@@ -292,14 +304,80 @@ The Arduino MATLAB hardware setup consists from three major parts: a DC motor, A
 
 After checking encoder signal we assembled a MATLAB Simulink \ref{fig:arduinoSimulink} model to be able to read encoder's speed and direction. This time rotor was driven by applied voltage on the motor. This way we got stable uniform encoder signal to check the encoder velocity units and direction. We were partially successful. Quick observation shows that even though the motor had constant velocity with no load or oscillations on direction the model showed chaotic alternation in motor direction. After analysing the recorded signal we come to the conclusion that model with Arduino could not keep up with the signal and the samples resulted in aliasing. This was further proven when we tried to increase the sample frequency of the Arduino simulink model. There is a possibility that there is some additional sample rate related parameters of the model that could solve problem with aliasing, but we did not find it and came to a conclusion that Arduino's MATLAB Simulink implementation is just simply not fast enough. There could be made a walk-around by coding the Arduino with its native Arduino IDE to minimize the overhead and set up custom bare minimum communication method over virtual com port UART.
 
-\subsection{Different motor setup}
 
-After we have failed to read the encoder's positional data from Arduino using MATLAB we have decided to try to use another type of motor \ref{fig:arduinoMotorSetupDiag2}. Even thought it is still essentially simple DC motor, it has a high rate gears and feedback potentiometer. Typically this type of servo motors are used as open loop controllers with no feedback what so ever. But we decidede to open it up and solder Arduino's internal analog to digital converter right on the middle terminal of the potentiometer.
+\subsection{Commercial servo motor setup}
 
 \begin{figure} [h!]
 \centerline{\includegraphics[width=.75\textwidth]{Screenshots for paper/arduino/model 2/model2.png}}
+\caption{Arduino with Commercial servo motor setup}
+\label{fig:arduinoMotorSetupDiag2}
+\end{figure}
+
+After we initially have failed to read the encoder's positional data from Arduino using MATLAB we have decided to try to use another type of motor \ref{fig:arduinoMotorSetupDiag2}. Even thought it is still essentially simple DC motor, it has a high rate gears and feedback potentiometer. Typically this type of servo motors are used as open loop controllers with no feedback what so ever. But we decidede to open it up and solder Arduino's internal analog to digital converter right on the middle terminal of the potentiometer.
+
+\subsection{Speeding things up}
+
+It is possible to use previously metioned MATLAB + Arduino method even thought we could not keep up with the reading from encoder. The trick is to use two separate Arduino's. First should be as usual connected to the MATLAB directly, but the second is configured to have external hardware interrupt pins to fire counter and check the position of the encoder. By using more expensive STM32F302R8C6 we have reached redundant and reliable source of ADC data and serial communication. 
+
+\begin{figure} [h!]
+\centerline{\includegraphics[width=.95\textwidth]{Screenshots for paper/STM32/Blank diagram.png}}
+\caption{STM32 hardware setup model (model4)}
+\label{fig:stm32f3_m1}
+\end{figure}
+
+In the \ref{fig:stm32f3_m1} diagram the PC1 is using MATLAB software and communicates with the Arduino UNO directly over UART and is in control of the motor signal. We have chosen STM32F3 as a substitute for another Arduino board due to its high clock (72Mhz over 8Mhz) and higher precision ADC (of 12bit) but is proven to be redundant. 
+
+\begin{figure} [h!]
+\centerline{\includegraphics[width=.75\textwidth]{Screenshots for paper/arduino/model 2/setup2.jpg}}
 \caption{Arduino with hardware setup model (model2)}
 \label{fig:arduinoMotorSetupDiag2}
+\end{figure}
+
+It might be possible to reduce number of micro controllers just to single STM32F3 due to its high potential. This would allow us to skip manual logging and importing step entirely, but requires dedicated research time to try and set it up. So far we did not configure it directly to the MATLAB even if nucleo-64 boards are proven to be very Arduino compatible, but are planning in future.
+
+\subsection{System Identification and controller evaluation}
+\subsubsection{Signal Processing}\
+
+Using two micro controllers to control the motor and log the data was a huge success. However there was a new problem of data synchronization. Because STM32 is capable of continuous analog to digital conversion we could just log down the input from the MATLAB to the control board without much data loss and then low pass the data to fit the input. There is a chance that due to low pass filter's ability to shift the phase, we could be off in the phase and that could affect the quality of both linear and non-linear approximation models from the system identification toolkit of the MATLAB software.
+
+\begin{figure} [h!]
+\centerline{\includegraphics[width=.75\textwidth]{Screenshots for paper/matlab models/data reconstruction.PNG}}
+\caption{logged data fitted to follow the input (low passed)}
+\label{fig:dataReconstruction}
+\end{figure}
+
+The process of input logging, filtering and phase correction was applied for every signal sent to the system. This includes several seconds of multiple iterations on saw-tooth, square, sine and combination of those above motioned signals. Even though MATLAB's ability to identify the system is good. It does not fully utilize the hardware accelerations provided by our personal computers and does think for a while without noticeable load on both CPU and GPU. It is suggestible to have another software solution for system identification if possible due to inefficient use of computational resources.
+
+\subsubsection{System identification results}
+The obtained datasets were feed into system identification app for model generation.
+Two models were obtained: linear transfer function and non-linear Auto Regressive with Exogenous input(NLARX) model. Below, figure \ref{fig:sysIdentfromSTMsetup} (a) represents the identified linear model representing in green, fitting the validation data by 41.07\%.  
+
+\begin{figure} [h!]
+\centerline{\includegraphics[width=.49\textwidth]{Screenshots for paper/arduino/tf_fixed_two_poles.png}
+{\includegraphics[width=.49\textwidth]{Screenshots for paper/arduino/nlarx_model_fit.png}}}
+\caption{(a) Plot of the gathered and simulated output of the identified model over time (b) Plot of the gathered and simulated output of the identified nlarx model over time }
+\label{fig:sysIdentfromSTMsetup}
+\end{figure}
+
+
+The nonlinear model shown in figure \ref{fig:sysIdentfromSTMsetup} (b) has resulted in about 20\% fit on validation dataset, which suggest that the training resulted in overfitting and the model can not properly fit the testing data. 
+
+
+\subsubsection{Integrating linear model with PID controller}
+The overall scheme is shown below in figure \ref{fig:arduinoSetupClosedLoop}
+
+\begin{figure} [h!]
+\centerline{\includegraphics[width=.75\textwidth]{Screenshots for paper/arduino/Final_hardware_testing/closed_loop_linear.PNG}}
+\caption{Closed loop with the linear model}
+\label{fig:arduinoSetupClosedLoop}
+\end{figure}
+
+The result of feeding the setpoint sawtooth signal is shown in figure \ref{fig:Arduino_sawtooth}, with the controlled signal resulting in the following parameters: Rise time=21.3ms, Settling time=235ms.
+
+\begin{figure} [h!]
+\centerline{\includegraphics[width=.75\textwidth]{Screenshots for paper/arduino/Final_hardware_testing/sawtooth_response.png}}
+\caption{Sawtooth signal}
+\label{fig:Arduino_sawtooth}
 \end{figure}
 
 \section{dSpace}
@@ -323,17 +401,12 @@ The model design was implemented in simulink environment within which the Simuli
 \end{figure}
 
 
-
-
-
-
-
 \chapter{Results}
 The final obtained results are going to be presented in this chapter. It should be mentioned that currently presented results are intermediate steps results and not the final ones. The final results were not achieved yet due to difficulties with starting the custom PID controller with the dSpace hardware. Overall, it is estimated that currently the project is at 80\% completion state, with the hardware setups constructed and running. The simulation models and the software parts which control the hardware are finished as well. 
 
 \begin{figure} [h!]
-\centerline{\includegraphics[width=.55\textwidth]{Screenshots for paper/matlab models/simulation_transfer_function_sys_ident.png}
-{\includegraphics[width=.55\textwidth]{Screenshots for paper/dSpace/hardware_test_sys_ident.png}}
+\centerline{\includegraphics[width=.45\textwidth]{Screenshots for paper/matlab models/simulation_transfer_function_sys_ident.png}
+{\includegraphics[width=.45\textwidth]{Screenshots for paper/dSpace/hardware_test_sys_ident.png}}
 }
 \caption{(a) Resultant transfer function match for the MATLAB simulated model and (b) Resultant transfer function match for the dSpace model }
 \label{fig:tfresultsim2}
@@ -342,12 +415,21 @@ The final obtained results are going to be presented in this chapter. It should 
 
 The above figures represent the results of system identification applied on gathered data from simulation and from hardware experiment. On the left you can see that the generated transfer function of the simscape motor model shows a perfect fit when applied with validation dataset. Whereas the same transfer function model generated from the hardware collected data shows a result of 73\%, although the general dynamics is captured. Arduino setup result were not generated as due to reasons discussed in the Arduino setup chapter. 
 
-The final results will include the comparison of reaction of the DC motors (simulation, Arduino driven and dSpace) to the same input signal with the data-driven controllers designed for each setup respectively. Also, the dSpace motor's physical values are going to be input in simulation, accordingly the controller will be synthesized and this model shall be compared with the real hardware setup. Ultimately, in case of success with the proposed Arduino experiment, a reinforcement learning setup will be created based on Arduino, which will be the most significant result of our project.
+\subsection{results from Arduino setup}
+The pid controller with the identified model give the controlled signal chasing the reference signal with the settling time being 235 ms.
+
+\begin{figure} [h!]
+\centerline{\includegraphics[width=.45\textwidth]{Screenshots for paper/arduino/Final_hardware_testing/square_response.png}
+{\includegraphics[width=.35\textwidth]{Screenshots for paper/arduino/Final_hardware_testing/untitled.png}}
+}
+\caption{Control and simulated signal plots for \emph{(a) Results of square} and \textit{(b) Results of sine} waves }
+\label{fig:tfresultsim2}
+\end{figure}
 
 \chapter{Conclusion and Future work}
-We applied the Data-Driven control method to three different setups for this project. A MATLAB simulation, an Arduino and a DC motor driver setup and a dSpace setup were used to generate the DC motor voltage-position relation data. The obtained data was then analyzed in MATLAB system identification toolbox to obtain the controller for the given setup. 
+We applied the Data-Driven control method to four different setups for this project. A MATLAB simulation, an Arduino, an STM32 and a DC motor driver setup and a dSpace setup were used to generate the DC motor voltage-position relation data. The obtained data was then analyzed in MATLAB system identification toolbox to obtain the tranfer function for the given setup. The ultimate goal of the project - generation of robust controller using data driven approach was achieved with the STM32 setup. While the controller has been generated for the 'solo' Arduino setup as well, the performance was approximately 9 times worse than that of the STM32 setup generated controller. It was not possible to verify the performance of controller for the dSpace setup due to inability of the software provided by manufacturer to include third party controller for the model before running.
 
-There are multiple steps that have to be taken for future work. First, the obtained data should be analyzed using a different method to check if improved inference speed and robustness could be achieved. One of possible variants is the NARX Neural Network, as was suggested in the related work by \cite{naung2018a}. The second Arduino setup has to be implemented fully as well, as we believe this is a promising method for our project. The synthesized dSpace controller has to be run with the hardware, as we were not successful with this so far. Another important step is running the simulation again with parameter of the model set to those of a real DC motor and those of the dSpace setup. The simulated model output and the real hardware setup results will be compared afterwards.
+A lot of work has been done for the project, however there are still multiple possible extensions for the project that could be taken as a future work. For instance, another method could be used to analyze the obtained data to check if improved inference speed and robustness could be achieved. One of possible variants is the NARX Neural Network, as was suggested in the related work by \cite{naung2018a}.
 
 
 %%%% ADD YOUR BIBLIOGRAPHY HERE
