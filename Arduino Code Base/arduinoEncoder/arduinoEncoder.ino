@@ -19,6 +19,8 @@ void setup() {
   lastMessageMillis = micros();
   // put your setup code here, to run once:
   Serial.begin(115200);
+  pinMode(A0, INPUT_ANALOG);
+  pinMode(A1, INPUT_ANALOG);
   pinMode(c1, INPUT);
   pinMode(c2, INPUT);
   pinMode(5, OUTPUT);
@@ -32,7 +34,7 @@ void setup() {
 }
 
 bool epta=true;
-bool sync = false;
+bool sync = true;
 
 void loop() {
   // put your main code here, to run repeatedly:
@@ -47,10 +49,18 @@ void loop() {
 //  }
 //    Serial.print(micros());
 //    Serial.print("Direction: ");
+    int a0 = analogRead(A0);
+    int a1 = analogRead(A1);
+
     if(sync){
       Serial.print(micros());
       Serial.print("\t");
+      Serial.print(a0);
+      Serial.print("\t");
+      Serial.print(a1);
+      Serial.print("\t");
       Serial.println(tisks);
+//      digitalWrite(5, a0
     }else{
       sync=digitalRead(s1);
       
